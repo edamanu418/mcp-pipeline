@@ -1,0 +1,20 @@
+# 実行データ
+pipeline_data.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# テスト・品質管理
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# エディタ
+.vscode/
+.idea/
