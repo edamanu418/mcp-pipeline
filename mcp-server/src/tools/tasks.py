@@ -19,6 +19,7 @@ class TaskTools(WorkflowBase):
         target, error = self._start_item(tasks, task_order)
         if error:
             return self._error(error, f"get_status(pipeline_id='{pipeline_id}') で正しい task_order を確認してください。")
+        assert target is not None
 
         save(data)
 
@@ -72,6 +73,7 @@ class TaskTools(WorkflowBase):
         current_task, next_task, error = self._complete_item(tasks, task_id)
         if error:
             return self._error(error, f"get_status(pipeline_id='{pipeline_id}') で正しい task_id を確認してください。")
+        assert current_task is not None
 
         current_task["output"] = output
         save(data)
@@ -91,6 +93,7 @@ class TaskTools(WorkflowBase):
                 f"全{total}タスク完了です！パイプライン「{pipeline['name']}」が終了しました。ユーザーに完了を報告してください。",
             )
 
+        assert next_task is not None
         return self._done(
             {
                 "completed_task": {"order": current_task["order"], "title": current_task["title"]},
