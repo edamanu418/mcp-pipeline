@@ -9,7 +9,7 @@ class WorkflowBase(NextActionBase):
     """next_action パターン + WorkflowItem ライフサイクル管理の基底クラス。
     _start_item / _complete_item でアイテムの状態遷移を提供する。"""
 
-    def _start_item(self, items: dict[str, Any], order: int) -> tuple[dict | None, str]:
+    def _start_item(self, items: dict[str, Any], order: int) -> dict:
         """アイテムを IN_PROGRESS に更新する。
 
         Args:
@@ -17,17 +17,20 @@ class WorkflowBase(NextActionBase):
             order: 開始するアイテムの順番。
 
         Returns:
-            (item, error_message) — エラー時は item が None。
+            更新済みアイテム。
+
+        Raises:
+            ValueError: 指定した order のアイテムが存在しない場合。
         """
         target = next((i for i in items.values() if i["order"] == order), None)
         if not target:
-            return None, f"order={order} が見つかりません。"
+            raise ValueError(f"order={order} が見つかりません。")
 
         target["status"] = ItemStatus.IN_PROGRESS
         target["started_at"] = datetime.now().isoformat()
-        return target, ""
+        return target
 
-    def _complete_item(self, items: dict[str, Any], item_id: str) -> tuple[dict | None, dict | None, str]:
+    def _complete_item(self, items: dict[str, Any], item_id: str) -> tuple[dict, dict | None]:
         """アイテムを COMPLETED に更新し、次の pending アイテムを返す。
 
         Args:
@@ -35,10 +38,13 @@ class WorkflowBase(NextActionBase):
             item_id: 完了させるアイテムのID。
 
         Returns:
-            (current_item, next_item, error_message) — エラー時は両 item が None。
+            (current_item, next_item) — next_item は次の pending がなければ None。
+
+        Raises:
+            ValueError: 指定した item_id のアイテムが存在しない場合。
         """
         if item_id not in items:
-            return None, None, f"item_id '{item_id}' が見つかりません。"
+            raise ValueError(f"item_id '{item_id}' が見つかりません。")
 
         current = items[item_id]
         current["status"] = ItemStatus.COMPLETED
@@ -53,4 +59,4 @@ class WorkflowBase(NextActionBase):
             None,
         )
 
-        return current, next_item, ""
+        return current, next_item

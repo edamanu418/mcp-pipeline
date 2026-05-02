@@ -16,10 +16,10 @@ class TaskTools(WorkflowBase):
         pipeline = data["pipelines"][pipeline_id]
         tasks = pipeline["tasks"]
 
-        target, error = self._start_item(tasks, task_order)
-        if error:
-            return self._error(error, f"get_status(pipeline_id='{pipeline_id}') で正しい task_order を確認してください。")
-        assert target is not None
+        try:
+            target = self._start_item(tasks, task_order)
+        except ValueError as e:
+            return self._error(str(e), f"get_status(pipeline_id='{pipeline_id}') で正しい task_order を確認してください。")
 
         save(data)
 
@@ -70,10 +70,10 @@ class TaskTools(WorkflowBase):
         pipeline = data["pipelines"][pipeline_id]
         tasks = pipeline["tasks"]
 
-        current_task, next_task, error = self._complete_item(tasks, task_id)
-        if error:
-            return self._error(error, f"get_status(pipeline_id='{pipeline_id}') で正しい task_id を確認してください。")
-        assert current_task is not None
+        try:
+            current_task, next_task = self._complete_item(tasks, task_id)
+        except ValueError as e:
+            return self._error(str(e), f"get_status(pipeline_id='{pipeline_id}') で正しい task_id を確認してください。")
 
         current_task["output"] = output
         save(data)
